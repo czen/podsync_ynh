@@ -1,0 +1,23 @@
+[server]
+port = __PORT__
+data_dir = "__PODSYNC_DATA_DIR__"
+hostname = "https://__DOMAIN__/__PATH__"
+
+[tokens]
+youtube = "__YOUTUBE_TOKEN__"
+
+[feeds]
+    [feeds.ListenLater]
+    url = "__YOUTUBE_PATH__"
+    quality = "high" # or "low"
+    format = "audio" # or "video"
+    # Optinally include this feed in OPML file (default value: false)
+    opml = true
+
+# Optional log config. If not specified logs to the stdout
+#[log]
+#    filename = "podsync.log"
+#    max_size = 50 # MB
+#    max_age = 30 # days
+#    max_backups = 7
+#    compress = true
