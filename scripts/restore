@@ -31,9 +31,9 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+#db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+#db_user=$db_name
+#phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
@@ -100,28 +100,43 @@ chown -R $app:www-data "$datadir"
 #=================================================
 # RESTORE THE PHP-FPM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Restoring the PHP-FPM configuration..." --time --weight=1
+# ynh_script_progression --message="Restoring the PHP-FPM configuration..." --time --weight=1
 
-ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
+# ynh_restore_file --origin_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
 
 #=================================================
 # RESTORE FAIL2BAN CONFIGURATION
 #=================================================
-ynh_script_progression --message="Restoring the Fail2Ban configuration..." --time --weight=1
+# ynh_script_progression --message="Restoring the Fail2Ban configuration..." --time --weight=1
 
-ynh_restore_file "/etc/fail2ban/jail.d/$app.conf"
-ynh_restore_file "/etc/fail2ban/filter.d/$app.conf"
-ynh_systemd_action --action=restart --service_name=fail2ban
+# ynh_restore_file "/etc/fail2ban/jail.d/$app.conf"
+# ynh_restore_file "/etc/fail2ban/filter.d/$app.conf"
+# ynh_systemd_action --action=restart --service_name=fail2ban
 
 #=================================================
 # SPECIFIC RESTORATION
 #=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
-# ynh_script_progression --message="Reinstalling dependencies..." --time --weight=1
+ynh_script_progression --message="Reinstalling dependencies..." --time --weight=1
 
 # Define and install dependencies
-# ynh_install_app_dependencies $pkg_dependencies
+ynh_install_app_dependencies $pkg_dependencies
+
+# find existing youtube-dl
+# if youtube-dl exists
+# update it
+if youtubedl_exists; then
+    ynh_app_setting_set --app=$app --key=youtube-dl --value=existing
+    youtube-dl -U
+else
+  # if youtube-dl not found install it
+  wget https://github.com/ytdl-org/youtube-dl/releases/download/2021.12.17/youtube-dl -O /usr/local/bin/youtube-dl
+  chmod a+rx /usr/local/bin/youtube-dl
+  ln -s /usr/local/bin/youtube-dl /usr/bin/youtube-dl
+  ynh_app_setting_set --app=$app --key=youtube-dl --value=new
+  youtube-dl -U
+fi
 
 #=================================================
 # RESTORE THE MYSQL DATABASE
@@ -137,9 +152,9 @@ ynh_systemd_action --action=restart --service_name=fail2ban
 #=================================================
 ynh_script_progression --message="Restoring various files..." --time --weight=1
 
-ynh_restore_file --origin_path="/etc/cron.d/$app"
+#ynh_restore_file --origin_path="/etc/cron.d/$app"
 
-ynh_restore_file --origin_path="/etc/$app/"
+#ynh_restore_file --origin_path="/etc/$app/"
 
 #=================================================
 # RESTORE SYSTEMD
@@ -161,6 +176,9 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..." --time --weight=1
 
+mkdir -p "/var/log/$app"
+touch "/var/log/$app/$app.log"
+
 yunohost service add $app --description="A short description of the app" --log="/var/log/$app/$app.log"
 
 #=================================================
@@ -175,9 +193,9 @@ ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$ap
 #=================================================
 # RELOAD NGINX AND PHP-FPM
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server and PHP-FPM..." --time --weight=1
+#ynh_script_progression --message="Reloading NGINX web server and PHP-FPM..." --time --weight=1
 
-ynh_systemd_action --service_name=php$phpversion-fpm --action=reload
+#ynh_systemd_action --service_name=php$phpversion-fpm --action=reload
 ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================

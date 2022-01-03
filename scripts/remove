@@ -98,13 +98,16 @@ ynh_remove_fpm_config
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
-# ynh_script_progression --message="Removing dependencies..." --time --weight=1
+ynh_script_progression --message="Removing dependencies..." --time --weight=1
 
 # Remove metapackage and its dependencies
-# ynh_remove_app_dependencies
+ynh_remove_app_dependencies
 
-rm /usr/bin/youtube-dl
-rm /usr/local/bin/youtube-dl
+youtubedl_state=$(ynh_app_setting_get --app=$app --key=youtube-dl)
+if [ $youtubedl_state = "new" ]; then
+  rm -rf /usr/bin/youtube-dl
+  rm -rf /usr/local/bin/youtube-dl
+fi
 
 #=================================================
 # CLOSE A PORT

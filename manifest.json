@@ -6,8 +6,8 @@
         "en": "Service to fetch new youtube or vimeo videos and convert them into subscribeable audio podcast feed",
         "fr": "I don't speak french"
     },
-    "version": "1.0~ynh1",
-    "url": "https://github.com/mxpv/podsync",
+    "version": "2.4.2~ynh1",
+    "url": "https://github.com/czen/podsync_ynh",
     "upstream": {
         "license": "free",
         "website": "https://github.com/mxpv/podsync",

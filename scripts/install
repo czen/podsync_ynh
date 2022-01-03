@@ -114,12 +114,22 @@ ynh_script_progression --message="Installing dependencies..." --time --weight=1
 ###		- As well as the section "REINSTALL DEPENDENCIES" in the restore script
 ###		- And the section "UPGRADE DEPENDENCIES" in the upgrade script
 
-# ynh_install_app_dependencies $pkg_dependencies
+ynh_install_app_dependencies $pkg_dependencies
 
-wget https://github.com/ytdl-org/youtube-dl/releases/download/2021.12.17/youtube-dl -O /usr/local/bin/youtube-dl
-chmod a+rx /usr/local/bin/youtube-dl
-ln -s /usr/local/bin/youtube-dl /usr/bin/youtube-dl
-youtube-dl -U
+# find existing youtube-dl
+if youtubedl_exists; then
+  # if youtube-dl exists
+  # update it
+  ynh_app_setting_set --app=$app --key=youtube-dl --value=existing
+  youtube-dl -U
+else
+  # if youtube-dl not found install it
+  wget https://github.com/ytdl-org/youtube-dl/releases/download/2021.12.17/youtube-dl -O /usr/local/bin/youtube-dl
+  chmod a+rx /usr/local/bin/youtube-dl
+  ln -s /usr/local/bin/youtube-dl /usr/bin/youtube-dl
+  ynh_app_setting_set --app=$app --key=youtube-dl --value=new
+  youtube-dl -U
+fi
 
 #=================================================
 # CREATE DEDICATED USER
